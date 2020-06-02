@@ -6,7 +6,7 @@ const preconditions = require('/lib/preconditions');
 const authLib = require('/lib/xp/auth');
 const portalLib = require('/lib/xp/portal');
 
-function redirectToAuthorizationEndpoint() {
+function redirectToAuthorizationEndpoint(originalUrl) {
     log.debug('Handling 401 error...');
 
     const idProviderConfig = configLib.getIdProviderConfig();
@@ -14,7 +14,6 @@ function redirectToAuthorizationEndpoint() {
 
     const state = oidcLib.generateToken();
     const nonce = oidcLib.generateToken();
-    const originalUrl = requestLib.getRequestUrl();
     const context = {
         state: state,
         nonce: nonce,
@@ -188,10 +187,20 @@ function toArray(object) {
         return object;
     }
     return [object];
-};
+}
 
+function handle401() {
+    const originalUrl = requestLib.getRequestUrl();
+    return redirectToAuthorizationEndpoint(originalUrl);
+}
 
-exports.handle401 = redirectToAuthorizationEndpoint;
+function login(req) {
+    const originalUrl = (req.validTicket && req.params.redirect);
+    return redirectToAuthorizationEndpoint(originalUrl);
+}
+
+exports.handle401 = handle401;
+exports.login = login;
 exports.get = handleAuthenticationResponse;
 exports.logout = logout;
 
