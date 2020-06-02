@@ -10,6 +10,10 @@ function getIdProviderConfig() {
     preconditions.checkConfig(idProviderConfig, 'clientSecret');
 
     //Handle backward compatibility
+    if (idProviderConfig.tokenAuthMethod == null) {
+        //idProviderConfig.tokenAuthMethod = 'client_secret_post';
+        idProviderConfig.tokenAuthMethod = 'client_secret_basic';
+    }
     if (idProviderConfig.scopes == null) {
         idProviderConfig.scopes = 'profile email';
     }

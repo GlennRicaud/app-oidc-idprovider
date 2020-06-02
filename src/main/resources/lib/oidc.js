@@ -31,26 +31,31 @@ function generateAuthorizationUrl(params) {
 function requestIDToken(params) {
     const issuer = preconditions.checkParameter(params, 'issuer');
     const tokenUrl = preconditions.checkParameter(params, 'tokenUrl');
+    const tokenAuthMethod = preconditions.checkParameter(params, 'tokenAuthMethod');
     const clientId = preconditions.checkParameter(params, 'clientId');
     const clientSecret = preconditions.checkParameter(params, 'clientSecret');
     const redirectUri = preconditions.checkParameter(params, 'redirectUri');
     const nonce = preconditions.checkParameter(params, 'nonce');
     const code = preconditions.checkParameter(params, 'code');
-    //TODO Handle different authentication methods
 
     //https://openid.net/specs/openid-connect-core-1_0.html#TokenRequest
-    const body = 'grant_type=authorization_code'
-                 + '&code=' + code
-                 + '&redirect_uri=' + redirectUri
-                 + '&client_id=' + clientId
-                 + '&client_secret=' + clientSecret;
+    let body = 'grant_type=authorization_code'
+               + '&code=' + code
+               + '&redirect_uri=' + redirectUri;
+    if (tokenAuthMethod === 'client_secret_post') {
+        body += '&client_id=' + clientId
+                + '&client_secret=' + clientSecret
+    }
+
+    const headers = tokenAuthMethod === 'client_secret_basic' ? {
+        'Authorization': 'Basic ' + Java.type('com.enonic.app.oidcidprovider.OIDCUtils')
+            .base64(clientId + ':' + clientSecret)
+    } : undefined;
 
     const request = {
         url: tokenUrl,
         method: 'POST',
-        // headers: {
-        //     //https://tools.ietf.org/html/rfc6749#section-2.3.1
-        // },
+        headers: headers,
         body: body,
         contentType: 'application/x-www-form-urlencoded'
     };

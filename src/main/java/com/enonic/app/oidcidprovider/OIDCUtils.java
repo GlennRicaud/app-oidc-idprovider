@@ -1,8 +1,10 @@
 package com.enonic.app.oidcidprovider;
 
 import java.math.BigInteger;
+import java.nio.charset.StandardCharsets;
 import java.security.SecureRandom;
 import java.text.ParseException;
+import java.util.Base64;
 
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.JWTParser;
@@ -35,5 +37,12 @@ public class OIDCUtils
         return ClaimSetMapper.create().
             claimSet( jwtClaimsSet ).
             build();
+    }
+
+    public static String base64( final String value )
+    {
+        final byte[] valueBytes = value.getBytes( StandardCharsets.UTF_8 );
+        final byte[] encodedBytes = Base64.getEncoder().encode( valueBytes );
+        return new String( encodedBytes, StandardCharsets.UTF_8 );
     }
 }
